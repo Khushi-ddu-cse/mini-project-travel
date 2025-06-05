@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Travel Website</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      min-height: 100vh;
+    }
+
+    /* Blur effect container */
+    #dashboard {
+      position: relative;
+      filter: blur(8px);
+      transition: filter 0.5s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 40px;
+      padding: 20px;
+    }
+
+    #dashboard.unblur {
+      filter: none;
+      pointer-events: auto;
+    }
+
+    .card-container {
+      perspective: 1200px;
+      width: 245px;
+      height: 450px;
+      transition: transform 0.4s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .card-container:hover {
+      transform: scale(1.1);
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.8s ease;
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, #b3e5fc, #e1f5fe);
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .card-front img {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 10px;
+    }
+
+    .card-front h2 {
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    .card-front p {
+      font-size: 0.85rem;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background: #fff;
+      position: relative;
+    }
+
+    .card-back h3 {
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .card-back p,
+    .card-back ul {
+      font-size: 0.85rem;
+      color: #444;
+    }
+
+    .card-back ul {
+      text-align: left;
+      margin: 10px 0 10px 15px;
+      padding: 0;
+    }
+
+    .card-back ul li {
+      margin-bottom: 4px;
+    }
+
+    /* "For More" Button Style */
+    .for-more-btn {
+      margin-top: auto;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .for-more-btn:hover {
+      background-color: #0056b3;
+    }
+
+    /* Login popup styles */
+    #loginModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #loginBox {
+      background: white;
+      padding: 35px 30px;
+      border-radius: 12px;
+      width: 340px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.75);
+      text-align: center;
+    }
+
+    #loginBox h2 {
+      margin-bottom: 22px;
+      color: #333;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    #loginBox input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 18px 0;
+      border: 1.8px solid #ccc;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      transition: border-color 0.3s;
+    }
+
+    #loginBox input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    #loginBox button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 14px 0;
+      width: 100%;
+      font-size: 1.3rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: 700;
+    }
+
+    #loginBox button:hover {
+      background-color: #0056b3;
+    }
+
+    #errorMsg {
+      color: red;
+      margin-bottom: 15px;
+      font-size: 1rem;
+      display: none;
+    }
+
+    /* Modal for More Info */
+    #moreInfoModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    #moreInfoContent {
+      background: white;
+      max-width: 600px;
+      width: 100%;
+      border-radius: 12px;
+      padding: 25px 30px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      position: relative;
+      max-height: 80vh;
+      overflow-y: auto;
+      font-family: 'Segoe UI', sans-serif;
+      color: #222;
+    }
+
+    #moreInfoContent h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+      color: #007bff;
+    }
+
+    #moreInfoContent p {
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    #closeMoreInfo {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #333;
+      cursor: pointer;
+      user-select: none;
+      border: none;
+      background: none;
+    }
+
+    #closeMoreInfo:hover {
+      color: #007bff;
+    }
+
+    @media (max-width: 900px) {
+      #dashboard {
+        flex-direction: column;
+        gap: 35px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 🟩 Login Modal -->
+<div id="loginModal">
+  <div id="loginBox">
+    <h2>Login to Continue</h2>
+    <input type="text" id="username" placeholder="Enter username" />
+    <input type="password" id="password" placeholder="Enter password" />
+    <div id="errorMsg">Invalid credentials. Try again.</div>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- 🟦 Dashboard with Cards -->
+<div id="dashboard" class="">
+  <!-- Card 1 -->
+  <div class="card-container" onclick="flipCard(this)">
+    <div class="card">
+      <div class="card-front">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="About">
+        <h2>About Us</h2>
+        <p>Your journey begins with us.</p>
+      </div>
+      <div class="card-back">
+        <h3>We Are Your Travel Companion!</h3>
+        <ul>
+          <li>🌍 Trusted by 10,000+ users</li>
+        <li>💸 Budget-friendly travel planning</li>
+        <li>🧭 Transparent pricing and real reviews</li>
+        </ul>
+        <button class="for-more-btn" onclick="showMoreInfo(event, 'about')">Explore More</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="card-container" onclick="flipCard(this)">
+  <div class="card">
+    <div class="card-front">
+      <img src="https://cdn-icons-png.flaticon.com/512/888/888063.png" alt="Services" />
+      <h2>Our Services</h2>
+      <p>Plan your journey with ease and comfort.</p>
+    </div>
+    <div class="card-back">
+      <h3>What We Provide</h3>
+      <ul>
+        <li>📍 Destinations</li>
+        <li>💸 Budget Estimator</li>
+        <li>⭐ Reviews</li>
+        <li>🏨 Hotels</li>
+        <li>🚗 Transport Rates</li>
+      </ul>
+      <button class="for-more-btn" onclick="showMoreInfo(event, 'services')">Explore More</button>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Card 3 -->
+  <div class="card-container" onclick="flipCard(this)">
+  <div class="card">
+    <!-- Front Side -->
+    <div class="card-front">
+      <img src="https://cdn-icons-png.flaticon.com/512/854/854894.png" alt="Destinations" />
+      <h2>Destinations</h2>
+      <p>Discover India's most loved cities and their iconic experiences.</p>
+    </div>
+    <!-- Back Side -->
+    <div class="card-back">
+      <h3>Top Picks</h3>
+      <ul>
+        <li>📍 Famous Attractions</li>
+        <li>🛍 Local Markets</li>
+        <li>🍜 Authentic Street Food</li>
+        <li>📸 Photo-worthy Spots</li>
+        </ul>
+        <button class="for-more-btn" onclick="redirectToPage('Destination.html')">Explore More</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Card 4 -->
+  <div class="card-container" onclick="flipCard(this)">
+    <div class="card">
+      <div class="card-front">
+        <img src="https://cdn-icons-png.flaticon.com/512/3125/3125713.png" alt="Budget" />
+        <h2>Budget Planner</h2>
+        <p>Calculate cost of your trip.</p>
+      </div>
+      <div class="card-back">
+        <h3>Plan Smart</h3>
+        <ul>
+          <li>💰 Daily Costs</li>
+          <li>🛏 Stay Options</li>
+          <li>🛣 Transport</li>
+        </ul>
+        <button class="for-more-btn" onclick="redirectToPage('Budget Estimator.html')">Explore More</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Card 5 -->
+<div class="card-container" onclick="flipCard(this)">
+  <div class="card">
+    <div class="card-front">
+      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Reviews">
+      <h2>Customer Reviews</h2>
+      <p>Real feedback from travelers like you!</p>
+    </div>
+    <div class="card-back">
+      <h3>Trusted Platforms</h3>
+      <ul>
+        <li>🌟 Zomato - Authentic food reviews</li>
+        <li>🎬 BookMyShow - Movie & event ratings</li>
+        <li>🛌 TripAdvisor - Honest hotel & travel reviews</li>
+      </ul>
+      <button class="for-more-btn" onclick="redirectToPage('Review.html')">Explore More</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- 🟨 Modal for More Info -->
+<div id="moreInfoModal">
+  <div id="moreInfoContent">
+    <button id="closeMoreInfo" onclick="closeMoreInfo()">&times;</button>
+    <h2 id="modalTitle">Title Here</h2>
+    <p id="modalText">Detailed info goes here.</p>
+  </div>
+</div>
+
+<script>
+  // Hardcoded login credentials
+  const validUsername = "admin";
+  const validPassword = "1234";
+
+  function login() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+    const errorMsg = document.getElementById("errorMsg");
+
+    if(user === validUsername && pass === validPassword) {
+      // Hide login modal
+      document.getElementById("loginModal").style.display = "none";
+      // Remove blur on dashboard
+      const dash = document.getElementById("dashboard");
+      dash.classList.add("unblur");
+    } else {
+      errorMsg.style.display = "block";
+    }
+  }
+
+  // Flip card on click, but don't flip when "For More" clicked
+  function flipCard(cardContainer) {
+    if (event.target.classList.contains('for-more-btn')) {
+      // Don't flip if For More clicked
+      return;
+    }
+    const card = cardContainer.querySelector('.card');
+    card.classList.toggle('flipped');
+  }
+
+  // Show modal with detailed info
+  function showMoreInfo(event, section) {
+    event.stopPropagation(); // Stop card flip
+    const modal = document.getElementById('moreInfoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+  
+    // Set content based on section
+    if (section === 'about') {
+      modalTitle.textContent = "About Us - Detailed Info";
+      modalText.innerHTML = `
+       <p>
+      We are your smart travel companion, designed by <strong>B.Tech 2nd Year students of DDU</strong>.
+      This website is part of a project made with <strong> HTML, CSS, Javascript </strong> (Fronted) </p>
+      <p> <strong> Team Members:</strong><br>
+        Name : Ankita, Roll No. 24XXXXXXX <br>
+        Name : Khushi, Roll No. 24XXXXXXX <br>
+        Name : Piyush, Roll No. 24XXXXXXX <br>
+        Name : Vikas, Roll No. 24XXXXXXX </p>
+      `;
+    } else if (section === 'services') {
+      modalTitle.textContent = "Our Services - Detailed Info";
+      modalText.innerHTML = `     
+        <ul>
+        <li>📍 <strong>Destinations Explorer</strong> _ Discover top cities with key highlights.</li>
+        <li>💸 <strong>Budget Estimator</strong> - Plan your trip by entering budget, days & people.</li>
+        <li>🏨 <strong>Hotels</strong> - Browse hotel options by comfort & price range.</li>
+        <li>🍴 <strong>Local Food</strong> - Find local dishes, famous eateries, and price ideas.</li>
+        <li>🚗 <strong>Transport Rates</strong> - Check live/local rates for cabs, autos & rentals.</li>
+        <li>⭐ <strong>Reviews</strong> - Read trusted reviews from Zomato, BookMyShow, and real users.</li>
+        </ul>
+        <p>✅ <em>Plan smarter. Travel better. All in one place!</em></p>`;
+    }
+
+    // Show modal
+    modal.style.display = 'flex';
+  }
+  // Close modal 
+  function closeMoreInfo() {
+    const modal = document.getElementById('moreInfoModal');
+    modal.style.display = 'none';
+    document.getElementById('dashboard').style.filter = 'none';
+  }
+
+  // Optional: Close modal when clicking outside content
+  document.getElementById('moreInfoModal').addEventListener('click', function(e){
+    if(e.target === this) {
+      closeMoreInfo();
+    }
+  });
+</script>
+
+<script>
+    function redirectToPage(page) {
+             window.location.href = page;
+    }
+</script>
+
+
+</body>
+</html>

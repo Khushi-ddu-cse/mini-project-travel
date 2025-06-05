@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Destinations Trip Planner</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') no-repeat center center/cover;
+      margin: 40px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+    form {
+      max-width: 450px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #34495e;
+    }
+    select, input[type=number] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 5px;
+      border: 1.5px solid #ccc;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    select:focus, input[type=number]:focus {
+      border-color: #2980b9;
+      outline: none;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 14px;
+      background: #2980b9;
+      color: white;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: #1c5980;
+    }
+    #result {
+      max-width: 450px;
+      margin: 30px auto 0;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      font-size: 1.1rem;
+      line-height: 1.5;
+      color: #2c3e50;
+    }
+    #result p strong {
+      font-weight: 700;
+    }
+    .green {
+      color: #27ae60;
+      font-weight: 700;
+    }
+    .red {
+      color: #c0392b;
+      font-weight: 700;
+    }
+    ul {
+      margin: 10px 0 0 20px;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Plan Your Trip</h1>
+
+  <form id="tripForm">
+    <label for="destination">Select Destination:</label>
+    <select id="destination" name="destination" required>
+      <option value="" disabled selected>-- Choose city --</option>
+      <option value="Delhi">Delhi</option>
+      <option value="Mumbai">Mumbai</option>
+      <option value="Goa">Goa</option>
+      <option value="Jaipur">Jaipur</option>
+    </select>
+
+    <label for="tripType">Select Trip Type:</label>
+    <select id="tripType" name="tripType" required>
+      <option value="" disabled selected>-- Choose type --</option>
+      <option value="luxury">Luxury</option>
+      <option value="Standard">Standard</option>
+      <option value="basic">Basic</option>
+    </select>
+
+    <label for="days">Number of Days:</label>
+    <input type="number" id="days" name="days" min="1" max="30" required />
+
+    <label for="persons">Number of Adults:</label>
+    <input type="number" id="persons" name="persons" min="1" max="20" value="1" required />
+
+    <label for="children">Number of Children (under 12):</label>
+    <input type="number" id="children" name="children" min="0" max="20" value="0" required />
+
+    <label for="budget">Your Budget (INR):</label>
+    <input type="number" id="budget" name="budget" min="1000" required />
+
+    <button type="submit">Calculate Estimate</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    // Destination base data (Standard type cost per adult per day)
+    const destinations = {
+      Delhi: {
+        hotelPerDay: 1500,
+        foodPerDay: 500,
+        transportPerDay: 300,
+        description: "Capital city of India with historical monuments and bustling markets."
+      },
+      Mumbai: {
+        hotelPerDay: 2000,
+        foodPerDay: 600,
+        transportPerDay: 400,
+        description: "Financial capital with beautiful beaches and vibrant nightlife."
+      },
+      Goa: {
+        hotelPerDay: 1800,
+        foodPerDay: 700,
+        transportPerDay: 350,
+        description: "Famous for beaches, parties, and delicious seafood."
+      },
+      Jaipur: {
+        hotelPerDay: 1200,
+        foodPerDay: 450,
+        transportPerDay: 250,
+        description: "The Pink City with royal palaces and rich culture."
+      }
+    };
+
+    // Multipliers for trip types
+    const tripTypeMultipliers = {
+      luxury: {
+        hotel: 1.8,
+        food: 1.5,
+        transport: 1.4
+      },
+      Standard: {
+        hotel: 1.0,
+        food: 1.0,
+        transport: 1.0
+      },
+      basic: {
+        hotel: 0.6,
+        food: 0.7,
+        transport: 0.7
+      }
+    };
+
+    const form = document.getElementById('tripForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const dest = form.destination.value;
+      const tripType = form.tripType.value;
+      const days = parseInt(form.days.value);
+      const persons = parseInt(form.persons.value);
+      const children = parseInt(form.children.value);
+      const budget = parseInt(form.budget.value);
+
+      if (!destinations[dest]) {
+        resultDiv.innerHTML = `<p style="color:red;">Please select a valid destination.</p>`;
+        return;
+      }
+      if (!tripTypeMultipliers[tripType]) {
+        resultDiv.innerHTML = `<p style="color:red;">Please select a valid trip type.</p>`;
+        return;
+      }
+      if (isNaN(days) || days < 1) {
+        resultDiv.innerHTML = `<p style="color:red;">Enter valid number of days (at least 1).</p>`;
+        return;
+      }
+      if (isNaN(persons) || persons < 1) {
+        resultDiv.innerHTML = `<p style="color:red;">Enter valid number of adults (at least 1).</p>`;
+        return;
+      }
+      if (isNaN(children) || children < 0) {
+        resultDiv.innerHTML = `<p style="color:red;">Enter valid number of children (0 or more).</p>`;
+        return;
+      }
+      if (isNaN(budget) || budget < 1000) {
+        resultDiv.innerHTML = `<p style="color:red;">Enter a budget of at least ₹1000.</p>`;
+        return;
+      }
+
+      const info = destinations[dest];
+      const multipliers = tripTypeMultipliers[tripType];
+
+      // Assume children pay 50% food and transport cost, no separate hotel cost (sharing room)
+      const hotelCostPerDay = Math.round(info.hotelPerDay * multipliers.hotel * persons);
+      const foodCostPerDay = Math.round(info.foodPerDay * multipliers.food * (persons + 0.5 * children));
+      const transportCostPerDay = Math.round(info.transportPerDay * multipliers.transport * (persons + 0.5 * children));
+
+      const estimatedCost = (hotelCostPerDay + foodCostPerDay + transportCostPerDay) * days;
+
+      let message = `
+        <h2>Trip Estimate for ${dest} (${tripType.charAt(0).toUpperCase() + tripType.slice(1)} Trip)</h2>
+        <p><strong>Description:</strong> ${info.description}</p>
+        <p><strong>Days:</strong> ${days}</p>
+        <p><strong>Adults:</strong> ${persons}</p>
+        <p><strong>Children:</strong> ${children}</p>
+        <p><strong>Your Budget:</strong> ₹${budget.toLocaleString()}</p>
+        <p><strong>Estimated Trip Cost:</strong> ₹${estimatedCost.toLocaleString()}</p>
+        <p><strong>Cost Breakdown (per day):</strong></p>
+        <ul>
+          <li>Hotel: ₹${hotelCostPerDay.toLocaleString()}</li>
+          <li>Food: ₹${foodCostPerDay.toLocaleString()}</li>
+          <li>Transportation: ₹${transportCostPerDay.toLocaleString()}</li>
+        </ul>
+        <p><strong>Total Breakdown for ${days} days:</strong></p>
+        <ul>
+          <li>Hotel: ₹${(hotelCostPerDay * days).toLocaleString()}</li>
+          <li>Food: ₹${(foodCostPerDay * days).toLocaleString()}</li>
+          <li>Transportation: ₹${(transportCostPerDay * days).toLocaleString()}</li>
+        </ul>
+      `;
+
+      if (budget >= estimatedCost) {
+        message += `<p class="green">🎉 Your budget is sufficient for this trip! Have a great time.</p>`;
+      } else {
+        const shortage = estimatedCost - budget;
+        message += `<p class="red">⚠️ Your budget is short by ₹${shortage.toLocaleString()}. You may need to adjust your plans or trip type.</p>`;
+      }
+
+      resultDiv.innerHTML = message;
+    });
+  </script>
+
+</body>
+</html>

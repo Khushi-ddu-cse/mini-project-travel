@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Popular Destinations - Trip Planner</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #3b3d3f;
+      width: 100%;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-bottom: 2px solid #2980b9;
+    }
+
+    .card-content {
+      padding: 18px 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-content h2 {
+      margin: 0 0 12px 0;
+      font-size: 1.4rem;
+      color: #2980b9;
+    }
+
+    .card-content p {
+      flex-grow: 1;
+      margin-bottom: 18px;
+      font-size: 1rem;
+      line-height: 1.4;
+      color: #555;
+    }
+
+    .btn-plan {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 15px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      align-self: flex-start;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .btn-plan:hover {
+      background-color: #1c5980;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 25px 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      position: relative;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-40px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #aaa;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .close-btn:hover {
+      color: #2980b9;
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      color: #2980b9;
+      margin-bottom: 15px;
+    }
+
+    .modal-content p {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .btn-book-now {
+      display: inline-block;
+      background-color: #27ae60;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-book-now:hover {
+      background-color: #1e8449;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Popular Destinations</h1>
+
+  <div class="grid-container" id="destinationsGrid">
+    <!-- Destination cards inserted here by JS -->
+  </div>
+
+  <!-- Modal for details -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="modalClose">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <p id="modalDescription"></p>
+      <p><strong>Best Time to Visit:</strong> <span id="modalBestTime"></span></p>
+      <p><strong>Top Attractions:</strong></p>
+      <ul id="modalAttractions"></ul>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="booking.html" class="btn-book-now" target="_blank">Book Now</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const destinations = [
+      {
+        name: "Delhi",
+        image: "https://s7ap1.scene7.com/is/image/incredibleindia/red-fort-delhi1-attr-hero?qlt=82&ts=1727352314555",
+        shortDesc: "Capital city with historic monuments and rich culture.",
+        bestTime: "October to March",
+        attractions: ["Red Fort", "Qutub Minar", "India Gate", "Lotus Temple"],
+        description: "Delhi is a vibrant city blending history, culture, and modernity. Explore ancient forts, bustling markets, and delicious street food."
+      },
+      {
+        name: "Mumbai",
+        image: "https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/c8/3a.jpg",
+        shortDesc: "Financial hub with beautiful beaches and nightlife.",
+        bestTime: "November to February",
+        attractions: ["Gateway of India", "Marine Drive", "Elephanta Caves", "Chhatrapati Shivaji Terminus"],
+        description: "Mumbai is India's city of dreams. From historic architecture to vibrant culture, it never sleeps."
+      },
+      {
+        name: "Goa",
+        image: "https://imgcdn.flamingotravels.co.in/Images/PlacesOfInterest/Baga-Beach.jpg",
+        shortDesc: "Famous beaches, nightlife, and seafood.",
+        bestTime: "November to March",
+        attractions: ["Baga Beach", "Dudhsagar Falls", "Fort Aguada", "Anjuna Market"],
+        description: "Goa offers a tropical paradise with golden beaches, exciting parties, and a relaxed vibe."
+      },
+      {
+        name: "Jaipur",
+        image: "https://upload.wikimedia.org/wikipedia/commons/4/41/East_facade_Hawa_Mahal_Jaipur_from_ground_level_%28July_2022%29_-_img_01.jpg",
+        shortDesc: "The Pink City with royal palaces and heritage.",
+        bestTime: "October to March",
+        attractions: ["Amber Fort", "City Palace", "Hawa Mahal", "Jantar Mantar"],
+        description: "Jaipur is rich in history and architecture, offering a glimpse into royal Indian culture."
+      }
+    ];
+
+    const grid = document.getElementById('destinationsGrid');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDescription = document.getElementById('modalDescription');
+    const modalBestTime = document.getElementById('modalBestTime');
+    const modalAttractions = document.getElementById('modalAttractions');
+    const modalClose = document.getElementById('modalClose');
+
+    // Create cards dynamically
+    destinations.forEach((dest, index) => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+
+      card.innerHTML = `
+        <img src="${dest.image}" alt="${dest.name}" />
+        <div class="card-content">
+          <h2>${dest.name}</h2>
+          <p>${dest.shortDesc}</p>
+          <button class="btn-plan" data-index="${index}">Plan Trip</button>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    // Show modal with details
+    grid.addEventListener('click', (e) => {
+      if(e.target.classList.contains('btn-plan')) {
+        const idx = e.target.getAttribute('data-index');
+        const dest = destinations[idx];
+
+        modalTitle.textContent = dest.name;
+        modalDescription.textContent = dest.description;
+        modalBestTime.textContent = dest.bestTime;
+
+        modalAttractions.innerHTML = '';
+        dest.attractions.forEach(place => {
+          const li = document.createElement('li');
+          li.textContent = place;
+          modalAttractions.appendChild(li);
+        });
+
+        modal.style.display = 'block';
+      }
+    });
+
+    // Close modal
+    modalClose.onclick = () => {
+      modal.style.display = 'none';
+    };
+
+    window.onclick = (event) => {
+      if(event.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+  </script>
+</body>
+</html>
